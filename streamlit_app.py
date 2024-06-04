@@ -23,7 +23,7 @@ def generate_aura_image(description):
         "The transition between the shades should be smooth and refined, creating a polished, high-quality finish. "
         "The image should be centered on a black background to make the random color tones pop and to add depth and contrast to the overall composition."
     )
-    
+
     response = client.images.generate(
         model=DALLE_MODEL,
         prompt=prompt,
@@ -31,7 +31,7 @@ def generate_aura_image(description):
         quality="standard",
         n=1
     )
-    
+
     return response.data[0].url
 
 # Streamlit app
@@ -78,6 +78,11 @@ def main():
             with st.spinner("Generating aura image..."):
                 aura_image_url = generate_aura_image(st.session_state['description'])
             st.image(aura_image_url, caption='Generated Aura Image', use_column_width=True)
+
+    # Serve the TikTok signature file from the app
+    with open("tiktokndPG5VVum7NRmpmSIi8TC9KZdngW9ujE.txt", "r") as f:
+        signature_file = f.read()
+    st.markdown(f"[Download signature file](/{signature_file})")
 
 if __name__ == "__main__":
     main()
