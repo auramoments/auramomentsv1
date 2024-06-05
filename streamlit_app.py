@@ -106,7 +106,7 @@ def main():
 
     # Provide the URL for TikTok verification file
     st.write("TikTok verification file is being served at:")
-    st.write(f"[http://localhost:8000/{verification_file_path}](http://localhost:8000/{verification_file_path})")
+    st.write(f"{verification_file_path}]({verification_file_path})")
 
 if __name__ == "__main__":
     main()
