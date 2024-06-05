@@ -1,7 +1,6 @@
 import streamlit as st
 from openai import OpenAI
 import base64
-import os
 
 # Initialize OpenAI client and set the API key from Streamlit secrets
 openai_api_key = st.secrets["OPENAI_API_KEY"]
@@ -34,6 +33,10 @@ def generate_aura_image(description):
     )
 
     return response.data[0].url
+
+# Read TikTok verification file content
+with open("tiktokK3jS5DxkwT6dmdBmroH3Xyp31Gvu90Me.txt", "r") as file:
+    tiktok_verification_content = file.read()
 
 # Streamlit app
 def main():
@@ -81,8 +84,8 @@ def main():
             st.image(aura_image_url, caption='Generated Aura Image', use_column_width=True)
 
     # Provide the URL for TikTok verification file
-    st.write("TikTok verification file is being served at:")
-    st.write(f"[https://auramomentsv1.streamlit.app/static/tiktokK3jS5DxkwT6dmdBmroH3Xyp31Gvu90Me.txt](https://auramomentsv1.streamlit.app/static/tiktokK3jS5DxkwT6dmdBmroH3Xyp31Gvu90Me.txt)")
+    if st.button("TikTok Verification File"):
+        st.text(tiktok_verification_content)
 
 if __name__ == "__main__":
     main()
