@@ -1,8 +1,7 @@
 import streamlit as st
 from openai import OpenAI
 import base64
-from http.server import SimpleHTTPRequestHandler, HTTPServer
-import threading
+import os
 
 # Initialize OpenAI client and set the API key from Streamlit secrets
 openai_api_key = st.secrets["OPENAI_API_KEY"]
@@ -35,29 +34,6 @@ def generate_aura_image(description):
     )
 
     return response.data[0].url
-
-# Path to your TikTok verification file
-verification_file_path = 'tiktokK3jS5DxkwT6dmdBmroH3Xyp31Gvu90Me.txt'
-
-class FileHandler(SimpleHTTPRequestHandler):
-    def do_GET(self):
-        if self.path == f'/{verification_file_path}':
-            self.send_response(200)
-            self.send_header("Content-type", "text/plain")
-            self.end_headers()
-            with open(verification_file_path, 'rb') as file:
-                self.wfile.write(file.read())
-        else:
-            self.send_error(404, "File not found")
-
-def start_server():
-    server = HTTPServer(('0.0.0.0', 8000), FileHandler)
-    server.serve_forever()
-
-# Start the server in a new thread
-server_thread = threading.Thread(target=start_server)
-server_thread.daemon = True
-server_thread.start()
 
 # Streamlit app
 def main():
@@ -106,7 +82,7 @@ def main():
 
     # Provide the URL for TikTok verification file
     st.write("TikTok verification file is being served at:")
-    st.write(f"{verification_file_path}")
+    st.write(f"[https://auramomentsv1.streamlit.app/static/tiktokK3jS5DxkwT6dmdBmroH3Xyp31Gvu90Me.txt](https://auramomentsv1.streamlit.app/static/tiktokK3jS5DxkwT6dmdBmroH3Xyp31Gvu90Me.txt)")
 
 if __name__ == "__main__":
     main()
