@@ -1,6 +1,7 @@
 import streamlit as st
 from openai import OpenAI
 import base64
+import os
 
 # Initialize OpenAI client and set the API key from Streamlit secrets
 openai_api_key = st.secrets["OPENAI_API_KEY"]
@@ -35,57 +36,60 @@ def generate_aura_image(description):
     return response.data[0].url
 
 # Read TikTok verification file content
-with open("tiktokK3jS5DxkwT6dmdBmroH3Xyp31Gvu90Me.txt", "r") as file:
-    tiktok_verification_content = file.read()
+verification_file_path = "tiktokK3jS5DxkwT6dmdBmroH3Xyp31Gvu90Me.txt"
+if os.path.exists(verification_file_path):
+    with open(verification_file_path, "r") as file:
+        tiktok_verification_content = file.read()
+else:
+    tiktok_verification_content = None
 
 # Streamlit app
 def main():
-    # Display the TikTok verification content
-    st.write(tiktok_verification_content)
+    if tiktok_verification_content:
+        st.write(tiktok_verification_content)
+    else:
+        st.title("Image Description Generator")
 
-    # The rest of your app code
-    st.title("Image Description Generator")
+        # File uploader
+        uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
-    # File uploader
-    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+        if uploaded_file is not None:
+            # Convert the file to an image path
+            image_path = "temp_image.jpg"  # Temporary file path
+            with open(image_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
 
-    if uploaded_file is not None:
-        # Convert the file to an image path
-        image_path = "temp_image.jpg"  # Temporary file path
-        with open(image_path, "wb") as f:
-            f.write(uploaded_file.getbuffer())
+            # Encode the image to base64
+            base64_image = encode_image(image_path)
 
-        # Encode the image to base64
-        base64_image = encode_image(image_path)
+            # Display the image
+            st.image(image_path, caption='Uploaded Image', use_column_width=True)
 
-        # Display the image
-        st.image(image_path, caption='Uploaded Image', use_column_width=True)
+            # Generate description using OpenAI GPT-4o
+            if st.button("Generate Description"):
+                # Use the client to make a request with the specified model
+                response = client.chat.completions.create(
+                    model=GPT_MODEL,
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant that responds in Markdown. Describe the following image."},
+                        {"role": "user", "content": [
+                            {"type": "text", "text": "Please describe the following image:"},
+                            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
+                        ]}
+                    ],
+                    temperature=0.0,
+                )
+                description = response.choices[0].message.content.strip()
+                st.session_state['description'] = description  # Store the description in session state
+                st.write("Description:")
+                st.write(description)
 
-        # Generate description using OpenAI GPT-4o
-        if st.button("Generate Description"):
-            # Use the client to make a request with the specified model
-            response = client.chat.completions.create(
-                model=GPT_MODEL,
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant that responds in Markdown. Describe the following image."},
-                    {"role": "user", "content": [
-                        {"type": "text", "text": "Please describe the following image:"},
-                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
-                    ]}
-                ],
-                temperature=0.0,
-            )
-            description = response.choices[0].message.content.strip()
-            st.session_state['description'] = description  # Store the description in session state
-            st.write("Description:")
-            st.write(description)
-
-    # Generate aura image using DALL-E 3
-    if 'description' in st.session_state:
-        if st.button("Generate Aura Image"):
-            with st.spinner("Generating aura image..."):
-                aura_image_url = generate_aura_image(st.session_state['description'])
-            st.image(aura_image_url, caption='Generated Aura Image', use_column_width=True)
+        # Generate aura image using DALL-E 3
+        if 'description' in st.session_state:
+            if st.button("Generate Aura Image"):
+                with st.spinner("Generating aura image..."):
+                    aura_image_url = generate_aura_image(st.session_state['description'])
+                st.image(aura_image_url, caption='Generated Aura Image', use_column_width=True)
 
 if __name__ == "__main__":
     main()
